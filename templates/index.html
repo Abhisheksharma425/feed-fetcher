@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Track, search, filter, and share Google Cloud BigQuery release notes and updates.">
+    <title>BigQuery Release Notes Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- SVG Icon Symbols Library -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+        <symbol id="icon-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+            <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+            <path d="M16 16h5v5"/>
+        </symbol>
+        <symbol id="icon-twitter" viewBox="0 0 24 24" fill="currentColor">
+            <!-- Modern X (Twitter) Logo -->
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+        </symbol>
+        <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.3-4.3"/>
+        </symbol>
+        <symbol id="icon-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+            <line x1="16" x2="16" y1="2" y2="6"/>
+            <line x1="8" x2="8" y1="2" y2="6"/>
+            <line x1="3" x2="21" y1="10" y2="10"/>
+        </symbol>
+        <symbol id="icon-external" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+            <polyline points="15 3 21 3 21 9"/>
+            <line x1="10" x2="21" y1="14" y2="3"/>
+        </symbol>
+        <symbol id="icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+        </symbol>
+        <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+        </symbol>
+        <symbol id="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18"/>
+            <path d="m6 6 12 12"/>
+        </symbol>
+        <symbol id="icon-cloud" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.5 19A3.5 3.5 0 0 0 21 15.5c0-2.79-2.54-4.5-5-4.5-.47 0-.89.09-1.3.27A5 5 0 0 0 5 14c0 2.76 2.24 5 5 5h7.5z"/>
+        </symbol>
+    </svg>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="header-content">
+                <div class="logo-area">
+                    <div class="logo-icon-wrapper">
+                        <svg class="logo-icon"><use href="#icon-cloud"></use></svg>
+                    </div>
+                    <div class="logo-text">
+                        <h1>BigQuery <span>Release Notes</span></h1>
+                        <p class="subtitle">Stay up-to-date with Google BigQuery feed, split, filter & share</p>
+                    </div>
+                </div>
+                <div class="sync-status-area">
+                    <div class="status-indicator">
+                        <span class="status-dot green"></span>
+                        <span id="sync-time-text">Checking cache...</span>
+                    </div>
+                    <button id="btn-refresh" class="btn btn-primary" title="Refresh release notes">
+                        <svg class="btn-icon"><use href="#icon-refresh"></use></svg>
+                        <span>Refresh Notes</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <!-- Filter Section -->
+            <section class="filter-section card">
+                <div class="filter-row">
+                    <!-- Search Bar -->
+                    <div class="search-wrapper">
+                        <svg class="search-icon"><use href="#icon-search"></use></svg>
+                        <input type="text" id="search-input" placeholder="Search features, tags, updates..." autocomplete="off">
+                        <button id="search-clear" class="btn-clear-search" style="display: none;">&times;</button>
+                    </div>
+                </div>
+                
+                <!-- Category Filters -->
+                <div class="categories-row">
+                    <span class="filter-label">Filter by type:</span>
+                    <div class="category-pills" id="category-pills-container">
+                        <!-- Populated by JS -->
+                        <button class="pill active" data-category="all">All <span class="count">0</span></button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Selection Controller Bar (Conditional) -->
+            <section class="selection-status-bar" id="selection-bar">
+                <div class="selection-info">
+                    <span class="selection-count" id="selection-count-text">0 updates selected</span>
+                </div>
+                <div class="selection-actions">
+                    <button class="btn btn-secondary btn-sm" id="btn-select-all">Select All Visible</button>
+                    <button class="btn btn-secondary btn-sm" id="btn-clear-select">Clear Selection</button>
+                    <button class="btn btn-accent" id="btn-tweet-selected">
+                        <svg class="btn-icon"><use href="#icon-twitter"></use></svg>
+                        <span>Tweet Selected</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Release Notes Grid/List -->
+            <section class="notes-feed">
+                <!-- Skeletons (Visible during loading) -->
+                <div class="skeleton-feed" id="skeleton-loader">
+                    <div class="skeleton-card card">
+                        <div class="skeleton-header">
+                            <div class="skeleton-badge"></div>
+                            <div class="skeleton-date"></div>
+                        </div>
+                        <div class="skeleton-line full"></div>
+                        <div class="skeleton-line two-thirds"></div>
+                        <div class="skeleton-line half"></div>
+                        <div class="skeleton-footer"></div>
+                    </div>
+                    <div class="skeleton-card card">
+                        <div class="skeleton-header">
+                            <div class="skeleton-badge"></div>
+                            <div class="skeleton-date"></div>
+                        </div>
+                        <div class="skeleton-line full"></div>
+                        <div class="skeleton-line line-90"></div>
+                        <div class="skeleton-line line-75"></div>
+                        <div class="skeleton-footer"></div>
+                    </div>
+                    <div class="skeleton-card card">
+                        <div class="skeleton-header">
+                            <div class="skeleton-badge"></div>
+                            <div class="skeleton-date"></div>
+                        </div>
+                        <div class="skeleton-line full"></div>
+                        <div class="skeleton-line two-thirds"></div>
+                        <div class="skeleton-line half"></div>
+                        <div class="skeleton-footer"></div>
+                    </div>
+                </div>
+
+                <!-- Actual Notes Container -->
+                <div id="notes-container" class="notes-grid" style="display: none;">
+                    <!-- Populated dynamically by JS -->
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state card" id="empty-state" style="display: none;">
+                    <div class="empty-icon-wrapper">
+                        <svg class="empty-icon"><use href="#icon-search"></use></svg>
+                    </div>
+                    <h3>No release notes found</h3>
+                    <p>Try modifying your search keywords or selecting a different category filter.</p>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>BigQuery Release Notes Dashboard &bull; Created with Flask &amp; Modern CSS</p>
+        </footer>
+    </div>
+
+    <!-- Twitter Composer Modal -->
+    <div class="modal-overlay" id="tweet-modal" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>
+                    <svg class="modal-title-icon"><use href="#icon-twitter"></use></svg>
+                    <span>Draft Tweet Composer</span>
+                </h3>
+                <button class="btn-close-modal" id="btn-close-tweet-modal" aria-label="Close modal">
+                    <svg class="modal-close-icon"><use href="#icon-close"></use></svg>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="composer-container">
+                    <label for="tweet-textarea" class="composer-label">Edit your tweet content:</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="tweet-textarea" rows="6" placeholder="What's happening?"></textarea>
+                    </div>
+                    <div class="composer-footer">
+                        <span class="char-counter" id="char-counter">0 / 280</span>
+                    </div>
+                </div>
+
+                <div class="tweet-preview-section">
+                    <h4 class="preview-title">Preview</h4>
+                    <div class="tweet-bubble-preview">
+                        <div class="tweet-avatar">BQ</div>
+                        <div class="tweet-body-preview">
+                            <div class="tweet-user-info">
+                                <span class="tweet-display-name">BigQuery Tracker</span>
+                                <span class="tweet-handle">@bq_release_tracker</span>
+                            </div>
+                            <p class="tweet-preview-text" id="tweet-preview-text">Preview text goes here...</p>
+                            <!-- Optional preview link card -->
+                            <div class="tweet-link-card" id="tweet-link-card" style="display: none;">
+                                <div class="link-card-content">
+                                    <span class="link-card-domain">docs.cloud.google.com</span>
+                                    <span class="link-card-title">BigQuery Release Notes</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btn-cancel-tweet">Cancel</button>
+                <button class="btn btn-accent" id="btn-publish-tweet">
+                    <svg class="btn-icon"><use href="#icon-twitter"></use></svg>
+                    <span>Post on X</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- JavaScript Application Logic -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
